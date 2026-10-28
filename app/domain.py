@@ -85,36 +85,36 @@ class Order:
 
     def confirm(self):
         if self.status != OrderStatus.DRAFT:
-            raise InvalidOrderTransition("Solo DRAFT")
+            raise InvalidOrderTransition("No se puede confirmar un pedido 2 veces")
         if not self.items or not self.customer.active:
-            raise InvalidOrderData("Requiere artículos y cliente activo")
+            raise InvalidOrderData("El pedido requiere al menos un articulo y un cliente activo")
         self.status = OrderStatus.CONFIRMED
-        self.events.append(DomainEvent("OrderConfirmed", self.id))
+        self.events.append(DomainEvent("Orden Confirmada", self.id))
 
     def ship(self, tracking_number: str):
         if self.status != OrderStatus.CONFIRMED:
-            raise InvalidOrderTransition("Requiere estado CONFIRMED")
+            raise InvalidOrderTransition("Para enviar el pedido, primero debe estar confirmado")
         if not tracking_number or not tracking_number.strip():
-            raise InvalidOrderData("La guía es obligatoria")
+            raise InvalidOrderData("Es obligatorio el número de seguimiento")
         self.status = OrderStatus.SHIPPED
-        self.events.append(DomainEvent("OrderShipped", self.id))
+        self.events.append(DomainEvent("Orden Enviada", self.id))
 
     def cancel(self, reason: str):
         if self.status != OrderStatus.CONFIRMED:
-            raise InvalidOrderTransition("Requiere estado CONFIRMED")
+            raise InvalidOrderTransition("Para cancelar un pedido, el pedido debe estar confirmado y no enviado")
         if not reason or not reason.strip():
-            raise InvalidOrderData("El motivo es obligatorio")
+            raise InvalidOrderData("El motivo de cancelación es obligatorio")
         self.status = OrderStatus.CANCELLED
-        self.events.append(DomainEvent("OrderCancelled", self.id))
+        self.events.append(DomainEvent("Orden Cancelada", self.id))
 
     def deliver(self):
         if self.status != OrderStatus.SHIPPED:
-            raise InvalidOrderTransition("Requiere estado SHIPPED")
+            raise InvalidOrderTransition("No se puede entregar un pedido que no ha sido enviado")
         self.status = OrderStatus.DELIVERED
-        self.events.append(DomainEvent("OrderDelivered", self.id))
+        self.events.append(DomainEvent("Orden Entregada", self.id))
 
     def return_order(self):
         if self.status != OrderStatus.SHIPPED:
-            raise InvalidOrderTransition("Requiere estado SHIPPED")
+            raise InvalidOrderTransition("No se puede devolver un pedido que no ha sido enviado")
         self.status = OrderStatus.RETURNED
-        self.events.append(DomainEvent("OrderReturned", self.id))
+        self.events.append(DomainEvent("Orden Devuelta", self.id))

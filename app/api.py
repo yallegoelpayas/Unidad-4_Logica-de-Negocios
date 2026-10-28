@@ -23,14 +23,14 @@ def get_order(order_id: str):
 def confirm_order(order_id: str):
     order = orders.get(order_id)
     if order is None:
-        raise HTTPException(status_code=404, detail="No existe")
+        raise HTTPException(status_code=404, detail="El pedido no existe")
     try:
         order.confirm()
     except InvalidOrderTransition as exc:
         raise HTTPException(status_code=409, detail=str(exc))
     except InvalidOrderData as exc:
         raise HTTPException(status_code=422, detail=str(exc))
-    return {"id": order.id, "status": order.status.value}
+    return {"id": order.id, "status": order.status.value, "mensaje": "Pedido confirmado exitosamente"}
 
 @app.post("/orders/{order_id}/ship")
 def ship_order(order_id: str, tracking_number: str):
